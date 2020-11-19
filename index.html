@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self';">
+    <style>
+      * {
+        font-family: Roboto Mono;
+      }
+
+      body {
+        background: #222;
+        margin: 0;
+      }
+
+      .fixed-fullscreen {
+        bottom: 0;
+        left: 0;
+        position: fixed;
+        right: 0;
+        top: 0;
+      }
+
+      .loading {
+        background: #222;
+      }
+
+      .flex {
+        display: flex;
+      }
+
+      .container {
+        align-items: center;
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .not-in-progress {
+        align-items: center;
+        flex-direction: column;
+      }
+
+      .title {
+        color: #fff;
+        font-size: 42px;
+        margin: 20px 0;
+      }
+
+      .subtitle {
+        color: #a4ede8;
+        font-size: 12px;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .game-over {
+        color: #d9968f;
+        text-shadow: 0 0 3px rgba(255, 255, 255, .4);
+      }
+
+      .game-over-score {
+        color: #a4ede8;
+        font-size: 24px;
+        margin: 0 0 20px;
+        text-shadow: 0 0 3px rgba(255, 255, 255, .4);
+      }
+
+      button {
+        background: #222;
+        border: 1px solid #a4ede8;
+        border-radius: 3px;
+        color: #a4ede8;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background: #444;
+        border-color: #fff;
+        color: #fff;
+      }
+
+      .in-progress {
+        align-items: center;
+        justify-content: space-around;
+      }
+
+      .board {
+        border: 1px solid #a4ede8;
+        height: 300px;
+        position: relative;
+        width: 150px;
+      }
+
+      .cell {
+        box-sizing: border-box;
+        border: .5px solid #2a2a2a;
+        height: 15px;
+        position: absolute;
+        width: 15px;
+        z-index: 0;
+      }
+
+      .cell-i {
+        background: #0cc;
+      }
+
+      .cell-l {
+        background: #e80;
+      }
+
+      .cell-j {
+        background: #00f;
+      }
+
+      .cell-o {
+        background: #ee0;
+      }
+      .cell-s {
+        background: #0a0;
+      }
+
+      .cell-z {
+        background: #ff0000;
+      }
+
+      .cell-t {
+        background: #aa00cc;
+      }
+
+      .animated-cell {
+        background: #fff  !important;
+        border: none  !important;
+      }
+
+      .sidebar {
+        flex-direction: column;
+        margin-left: 30px;
+      }
+
+      .sidebar-score {
+        color:  #a4ede8;
+      }
+
+      .queue {
+        align-items: center;
+        flex-direction: column;
+        opacity: 0.5;
+      }
+
+      .queue-item {
+        margin: 15px 0 0 0;
+        position: relative;
+        width: 60px;
+        height: 60px;
+      }
+
+      .projection {
+        opacity: 0.25;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loading fixed-fullscreen" id="loading"></div>
+    <div class="container fixed-fullscreen flex">
+      <div id="unstarted" class="not-in-progress flex">
+        <div class="title"> Tetris </div>
+        <div class="subtitle">
+          Use left and right arrow keys to move the bricks.
+          <br>
+          Use the up arrow key to rotate bricks.
+          <br>
+          Use the down arrow key to drop the brick.
+        </div>
+        <button id="start-game"> Start </button>
+      </div>
+
+      <div id="game-over" class="not-in-progress flex">
+        <div class="title game-over"> Game Over! </div>
+        <div class="game-over-score" id="game-over-score"></div>
+        <button id="restart-game"> Play again </button>
+      </div>
+
+      <div id="in-progress" class="in-progress flex">
+        <div class="board" id="board">
+          <div id="falling-brick"></div>
+          <div class="projection" id="projection"></div>
+        </div>
+        <div class="sidebar flex">
+          <div class="sidebar-score" id="sidebar-score"></div>
+          <div class="queue flex">
+            <div class="queue-item" id="queue-0"></div>
+            <div class="queue-item" id="queue-1"></div>
+            <div class="queue-item" id="queue-2"></div>
+            <div class="queue-item" id="queue-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="./dist/index.js"></script>
+  </body>
+</html>
