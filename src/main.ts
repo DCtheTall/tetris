@@ -1,7 +1,7 @@
 import {Observable, fromEvent, merge, timer, empty, queue} from 'rxjs';
 import {map, mapTo, scan, tap} from 'rxjs/operators';
 
-const FPS = 7.5;
+const FPS = 100;
 const GRID_WIDTH = 10;
 const GRID_HEIGHT = 20;
 const N_BRICK_TYPES = 7;
@@ -12,6 +12,9 @@ const BOARD_HTML_CHILDREN = 2;
 const ROW_ANIMATION_FRAMES = 6;
 const ROW_ANIMATION_INTERVAL = 2;
 const POINTS_PER_ROW = 100;
+const INITIAL_FRAMES_PER_UDPATE = 20;
+const MIN_FRAMES_PER_UPDATE = 10;
+const POINTS_PER_SPEED_INCREASE = 1e3;
 
 const LOADING_ID = 'loading';
 const START_GAME_ID = 'start-game';
@@ -385,6 +388,8 @@ interface State {
     fallingBrick: FallingBrick;
     queue: Queue;
     completedRowAnimationFrame: number | null;
+    frame: number;
+    framesPerUpdate: number,
 }
 
 /**
@@ -398,6 +403,8 @@ const initialState = (): State => ({
     fallingBrick: new FallingBrick(randomBrickType()),
     queue: [...Array(QUEUE_SIZE)].map(() => randomBrickType()),
     completedRowAnimationFrame: null,
+    frame: 0,
+    framesPerUpdate: INITIAL_FRAMES_PER_UDPATE,
 });
 
 const writeFallingBrickToGrid = (state: State) => {
@@ -438,18 +445,33 @@ const removeCompletedRows = (state: State) => ({
     bricks: removeCompletedRowsFromGrid(state.bricks),
 });
 
+const shouldUpdateSpeed = (oldScore: number, newScore: number) =>
+    (Math.floor(oldScore / POINTS_PER_SPEED_INCREASE) !==
+     Math.floor(newScore / POINTS_PER_SPEED_INCREASE));
+
+const updateSpeed = (framesPerUpdate: number) =>
+    Math.max(framesPerUpdate - 1, MIN_FRAMES_PER_UPDATE);
+
 const awardPoints = (state: State) => {
     let points = 0;
     for (const row of state.bricks) {
         if (isCompleteRow(row)) points += POINTS_PER_ROW;
     }
-    return {...state, score: state.score + points};
+    return {
+        ...state,
+        score: state.score + points,
+        framesPerUpdate:
+            shouldUpdateSpeed(state.score, state.score + points) ?
+                updateSpeed(state.framesPerUpdate) : state.framesPerUpdate,
+    };
 };
 
 /**
  * Update state after a clock tick.
  */
 const tickClock = (state: State): State => {
+    state.frame++;
+    if (state.frame % state.framesPerUpdate !== 0) return state;
     if (state.phase !== GamePhase.IN_PROGRESS) return state;
     if (isRowAnimating(state)) {
         state = tickCompletedRowAnimation(state);
